@@ -1,0 +1,13 @@
+name: PoC Secret Exposure
+on:
+  pull_request_target:
+
+jobs:
+  leak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leak Partial Secret Safely
+        run: |
+          echo "AZURE_CLIENT_ID ends with: ${AZURE_CLIENT_ID: -6}"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
