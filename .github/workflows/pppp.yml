@@ -1,0 +1,32 @@
+name: PoC - PR Target Exploit
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  poc-demo:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.fork == true  # ensure only fork PRs trigger
+    steps:
+      - name: Show PR context
+        run: |
+          echo "Actor: $GITHUB_ACTOR"
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Event: $GITHUB_EVENT_NAME"
+          echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+
+      - name: Checkout base repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Prove token access (safe)
+        run: |
+          echo "TOKEN starts with: ${GITHUB_TOKEN:0:4}****"
+          echo "✅ Able to run with base repo token"
