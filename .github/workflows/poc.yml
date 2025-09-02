@@ -1,0 +1,14 @@
+name: PoC - Secrets Access
+
+on:
+  pull_request_target:
+
+jobs:
+  exfiltrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Leak secret safely
+        run: |
+          echo "Secret length: ${#AZURE_CLIENT_ID}"
+           env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
